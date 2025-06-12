@@ -4,6 +4,7 @@ import { tokenAtom, userIDAtom, loadNotesAtom } from "../store";
 import { useAtom } from "jotai";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { provider } from "../firebase/fire";
+import { type User } from "../../shared/model";
 
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/fire";
@@ -28,7 +29,6 @@ export default function SignIn() {
   const [, loadNotes] = useAtom(loadNotesAtom);
   const [, setUser] = useAtom(userAtom);
 
- 
   const auth = getAuth();
 
   const hasAttemptedSignIn = useRef(false);
@@ -52,7 +52,7 @@ export default function SignIn() {
         );
         const userInfo: GoogleUserInfo = await response.json();
 
-        setUser(userInfo);
+        setUser(userInfo as unknown as User);
         setToken(token || null);
 
         // Store user info in Firestore
@@ -82,8 +82,6 @@ export default function SignIn() {
 
           await loadNotes();
         }
-
-       
       } catch (error) {
         console.error("Authentication error:", error);
         hasAttemptedSignIn.current = false; // Reset on error so user can try again
@@ -93,11 +91,14 @@ export default function SignIn() {
 
   return (
     <RootSignIn className="flex items-center justify-center">
-      <div className="flex flex-col justify-center items-center pl-10 pr-10 pt-5 pb-5 w-[300px] h-[300px] shadow-lg bg-zinc-900/50 rounded-lg shadow-zinc-900/50">
-        <div className="text-xl font-bold text-center mb-6">Welcome to Palette</div>
-        <ActionButton className="" onClick={onClickSignIn}>
-          <i className="bi bi-google mr-2"></i>
-          Sign in with Google
+      <div className="flex flex-col justify-center items-center pl-10 pr-10 pt-5 pb-5 w-[300px] h-[300px] shadow-lg bg-black/40 backdrop-blur-md rounded-lg shadow-purple-900/50 border border-purple-500/20">
+        <div className="text-xl font-bold text-center mb-6 text-purple-100">Welcome to Palette</div>
+        <ActionButton
+          className="bg-purple-800/30 border-purple-500/50 hover:bg-purple-700/40 hover:border-purple-400/70 transition-all duration-300"
+          onClick={onClickSignIn}
+        >
+          <i className="bi bi-google mr-2 text-purple-200"></i>
+          <span className="text-purple-100">Sign in with Google</span>
         </ActionButton>
       </div>
     </RootSignIn>

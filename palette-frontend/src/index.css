@@ -5,52 +5,91 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 @layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 246 83.3% 66.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+
   #root {
     @apply h-full;
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a0b2e 25%, #16213e 50%, #0f1629 75%, #000000 100%);
   }
 
   html,
   body {
-    
     @apply h-full;
-
-    
-
-    @apply bg-transparent;
-
     @apply font-sans antialiased text-white;
-
     @apply overflow-hidden;
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a0b2e 25%, #16213e 50%, #0f1629 75%, #000000 100%);
   }
 
   header {
     -webkit-app-region: drag;
   }
+  
   button {
     -webkit-app-region: no-drag;
   }
+  
   * {
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
     scrollbar-width: thin;
   }
 
   *::-webkit-scrollbar {
-    
     width: 8px !important;
     background-color: transparent !important;
   }
 
   *::-webkit-scrollbar-thumb {
     border-radius: 9999px !important;
-    background-color: rgba(255, 255, 255, 0.2) !important;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.4) 0%, rgba(79, 70, 229, 0.4) 100%) !important;
     border: none !important;
   }
 
   *::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.3) !important;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.6) 0%, rgba(79, 70, 229, 0.6) 100%) !important;
   }
 
   *::-webkit-scrollbar-track,
