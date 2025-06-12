@@ -1,0 +1,68 @@
+@import "tailwindcss";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+@layer base {
+  #root {
+    @apply h-full;
+  }
+
+  html,
+  body {
+    
+    @apply h-full;
+
+    
+
+    @apply bg-transparent;
+
+    @apply font-sans antialiased text-white;
+
+    @apply overflow-hidden;
+  }
+
+  header {
+    -webkit-app-region: drag;
+  }
+  button {
+    -webkit-app-region: no-drag;
+  }
+  * {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-width: thin;
+  }
+
+  *::-webkit-scrollbar {
+    
+    width: 8px !important;
+    background-color: transparent !important;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border-radius: 9999px !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-track-piece,
+  *::-webkit-scrollbar-corner,
+  *::-webkit-scrollbar-button {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none !important;
+  }
+}
