@@ -27,7 +27,7 @@ export const ChatHistory = ({
     );
   }
   return (
-    <ul className={twMerge("h-[calc(100vh-50px)] overflow-y-auto", className)} {...props}>
+    <ul className={twMerge("h-[calc(100vh-180px)] overflow-y-auto", className)} {...props}>
       {notes.map((note, index) => (
         <ChatPreview
           isActive={index === selectedNoteIndex}

@@ -27,7 +27,7 @@ export const ChatPage = () => {
       {token ? (
         <>
           <RootLayout className="">
-            <Sidebar className="relative bg-black/30 backdrop-blur-sm border-r border-purple-500/20 mt-0">
+            <Sidebar className="relative bg-black/30 backdrop-blur-sm border-r border-purple-500/20 mt-0 no-scrollbar">
               <div className="flex items-center gap-2 px-4 py-2 mb-5">
                 <span className="text-white/70 text-2xl sm:text-3xl md:text-4xl font-bold ml-10 ">
                   Palette

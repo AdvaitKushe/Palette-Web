@@ -69,6 +69,7 @@ export const ChatPreview = ({
         <span className="flex-1 truncate">{title}</span>
       )}
       <OptionsButton
+        className="ml-auto"
         isOptionsOpen={setIsOptionsOpen}
         index={index}
         isEditing={isEditing}
