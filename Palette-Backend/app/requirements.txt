@@ -6,3 +6,4 @@ google-generativeai
 firebase-admin
 pypdf
 anthropic
+dotenv

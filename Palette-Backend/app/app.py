@@ -7,7 +7,6 @@ from google.genai import types
 import firebase_admin
 from firebase_admin import firestore
 from firebase_admin import credentials
-from test import file
 from pypdf import PdfReader
 import anthropic
 import json
@@ -15,8 +14,33 @@ import socket
 import base64
 import os
 import io
-# Move Firebase initialization to the global scope, outside of any route
-cred = credentials.Certificate(r"./mock/serviceAccountKey.json")
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Get the parent directory (Palette-Backend)
+parent_dir = Path(__file__).parent.parent
+env_path = parent_dir / '.env'
+
+# Load environment variables from the parent directory
+load_dotenv(dotenv_path=env_path)
+
+
+# Create credentials dictionary from environment variables
+cred_dict = {
+    "type": "service_account",
+    "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+    "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+    "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n") if os.getenv("FIREBASE_PRIVATE_KEY") else None,
+    "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+    "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL")
+}
+
+cred = credentials.Certificate(cred_dict)
+
 try:
     firebase_admin.initialize_app(cred)
 except ValueError:
@@ -393,5 +417,5 @@ def limit_context(context_array, max_chars=2000):
     return limited_context
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5001)
 
