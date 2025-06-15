@@ -1,6 +1,8 @@
 flask
-gunicorn
 flask-cors
+python-docx
 openai
+google-generativeai
 firebase-admin
+pypdf
 anthropic

@@ -393,5 +393,5 @@ def limit_context(context_array, max_chars=2000):
     return limited_context
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run()
 
