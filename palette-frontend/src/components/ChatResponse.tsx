@@ -92,41 +92,36 @@ export const ChatResponse = ({
               },
               table: ({ children }) => {
                 try {
-                  // First, let's extract the raw markdown from the message
+                  // Extract the raw markdown from the message
                   const rawMarkdown = typed ? currentText : String(message.conversation.response);
 
-                  // Find the table in the markdown
-                  const tableRegex = /\|[\s\S]*?\|[\s\S]*?\|[\s\S]*?\|/g;
-                  const tableMatch = rawMarkdown.match(tableRegex);
-
-                  if (!tableMatch) {
+                  // Find all markdown tables in the content
+                  // A table is defined as consecutive lines starting and ending with |, with at least one separator row
+                  const tableBlockRegex = /((?:^\|.*\|\s*$\n?)+)/gm;
+                  const matches = rawMarkdown.match(tableBlockRegex);
+                  if (!matches || matches.length === 0) {
                     return <div>No table found in the content</div>;
                   }
+                  // Use the first table found
+                  let tableContent = matches[0].trim();
 
-                  // Get the table content
-                  const tableContent = tableMatch.join("\n");
-
-                  // Split into rows and ensure we have at least a header and one data row
-                  const rows = tableContent.split("\n").filter((row) => row.trim());
-                  if (rows.length < 2) {
+                  // Remove duplicate separator rows (|---|...|)
+                  const lines = tableContent.split("\n").filter(Boolean);
+                  let foundSeparator = false;
+                  const filteredLines = lines.filter((line) => {
+                    if (/^\|\s*(:?-+:?\s*\|)+\s*$/.test(line)) {
+                      if (foundSeparator) return false;
+                      foundSeparator = true;
+                      return true;
+                    }
+                    return true;
+                  });
+                  if (filteredLines.length < 2) {
                     return <div>Invalid table format</div>;
                   }
+                  tableContent = filteredLines.join("\n");
 
-                  // Create the markdown table
-                  const headerRow = rows[0];
-                  const columnCount = (headerRow.match(/\|/g) || []).length - 1;
-
-                  if (columnCount <= 0) {
-                    return <div>Invalid table format</div>;
-                  }
-
-                  // Create the separator row
-                  const separator = `|${Array(columnCount).fill("---").join("|")}|`;
-
-                  // Combine all rows
-                  const markdownTable = `${headerRow}\n${separator}\n${rows.slice(1).join("\n")}`;
-
-                  return <TableEditor initialMarkdown={markdownTable} />;
+                  return <TableEditor initialMarkdown={tableContent} />;
                 } catch (error) {
                   console.error("Error processing table:", error);
                   return <div>Error processing table</div>;
