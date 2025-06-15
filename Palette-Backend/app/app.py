@@ -17,8 +17,7 @@ import io
 from dotenv import load_dotenv
 from pathlib import Path
 
-# Get the parent directory (Palette-Backend)
-parent_dir = Path(__file__).parent.parent
+
 env_path =  './.env'
 
 # Load environment variables from the parent directory
