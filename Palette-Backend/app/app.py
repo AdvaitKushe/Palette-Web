@@ -19,7 +19,7 @@ from pathlib import Path
 
 # Get the parent directory (Palette-Backend)
 parent_dir = Path(__file__).parent.parent
-env_path = parent_dir / '.env'
+env_path =  './.env'
 
 # Load environment variables from the parent directory
 load_dotenv(dotenv_path=env_path)
@@ -417,5 +417,5 @@ def limit_context(context_array, max_chars=2000):
     return limited_context
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run()
 
