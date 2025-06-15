@@ -1,4 +1,4 @@
-import { notesAtom, selectedNoteIndexAtom, isWaitingForResponseAtom, currImageArrayAtom } from '../store'
+import { notesAtom, selectedNoteIndexAtom, isWaitingForResponseAtom,  } from '../store'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 
 export const useNotesList = ({ onSelect }: { onSelect?: () => void }) => {

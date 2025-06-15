@@ -22,7 +22,7 @@ export const UserInputArea = ({
   const addMessage = useSetAtom(addMessageAtom);
   const setIsWaitingForResponse = useSetAtom(isWaitingForResponseAtom);
   const [message, setMessage] = useAtom(messageAtom);
-  const [currImageArray, setCurrImageArray] = useAtom(currImageArrayAtom);
+  const [, setCurrImageArray] = useAtom(currImageArrayAtom);
   const { selectedNoteIndex } = useNotesList({});
 
   const [model] = useAtom(selectedModelAtom);

@@ -1,4 +1,4 @@
-import { atom, useSetAtom } from "jotai";
+import { atom,  } from "jotai";
 
 import { type Message, type NoteInfo, type User, type userInput } from '../../shared/model';
 import { addDoc, collection, doc, getDocs, updateDoc } from "firebase/firestore";

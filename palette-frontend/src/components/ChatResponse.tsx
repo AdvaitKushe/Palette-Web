@@ -90,7 +90,7 @@ export const ChatResponse = ({
                   <code className="bg-transparent px-1 py-0.5 rounded">{String(children)}</code>
                 );
               },
-              table: ({ children }) => {
+              table: ({  }) => {
                 try {
                   // Extract the raw markdown from the message
                   const rawMarkdown = typed ? currentText : String(message.conversation.response);

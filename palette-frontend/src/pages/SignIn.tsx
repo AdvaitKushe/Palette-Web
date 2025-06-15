@@ -10,7 +10,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/fire";
 //import { useEffect } from 'react'
 import { userAtom } from "../store";
-import { useRef, useState } from "react";
+import { useRef,  } from "react";
 
 interface GoogleUserInfo {
   id: string;
