@@ -10,7 +10,7 @@ export const SideBarActionRow = ({ children, className, ...props }: ComponentPro
       )}
       {...props}
     >
-      <NewChat className="w-full" />
+      <NewChat className="w-full  " />
     </div>
   )
 }

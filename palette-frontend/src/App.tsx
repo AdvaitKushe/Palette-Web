@@ -6,7 +6,7 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<ChatPage />} />
-        {/* <Route path="/billing" element={<BillingPage />} /> */}
+       
       </Routes>
     </BrowserRouter>
   );

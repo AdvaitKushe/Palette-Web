@@ -6,10 +6,10 @@ import { SideBarActionRow } from "../components/SideBarActionRow";
 import { GeneratedChat } from "../components/GeneratedChat";
 import { UserInputArea } from "../components/UserInputArea";
 import { ContentActionRow } from "../components/buttons/ContentActionRow";
-//import { SearchBox } from './components/SearchBox'
+
 import { ChatHistory } from "../components/ChatHistory";
 import { tokenAtom } from "../store";
-import { isSearchOpenAtom } from "../store";
+
 import { currImageArrayAtom } from "../store";
 import { useAtom } from "jotai";
 import { useRef } from "react";
@@ -18,7 +18,7 @@ export const ChatPage = () => {
   const [token] = useAtom(tokenAtom);
   const contentRef = useRef<HTMLDivElement>(null);
   const [, setCurrImageArray] = useAtom(currImageArrayAtom);
-  const [isSearchOpen] = useAtom(isSearchOpenAtom);
+
   const onSelect = () => {
     setCurrImageArray([]);
   };
@@ -27,7 +27,18 @@ export const ChatPage = () => {
       {token ? (
         <>
           <RootLayout className="">
-            <Sidebar className="relative bg-black/30 backdrop-blur-sm border-r border-purple-500/20">
+            <Sidebar className="relative bg-black/30 backdrop-blur-sm border-r border-purple-500/20 mt-0">
+              <div className="flex items-center gap-2 px-4 py-2 mb-5">
+                <span className="text-white/70 text-2xl sm:text-3xl md:text-4xl font-bold ml-10 ">
+                  Palette
+                </span>
+                <img
+                  src="./LogoMain.png"
+                  alt="Palette Logo"
+                  className="w-10 h-10 rounded-full"
+                />
+              </div>
+              
               <SideBarActionRow className="left-[200px] z-10 rounded-full" />
               <ChatHistory
                 className="h-full mt-7"
@@ -36,21 +47,23 @@ export const ChatPage = () => {
               />
             </Sidebar>
 
-            <Content className="border-l bg-black/20 backdrop-blur-sm border-purple-500/30 flex flex-col p-2 h-screen">
-              <ContentActionRow />
+            <Content className="border-l bg-black/20 backdrop-blur-sm border-purple-500/30 flex flex-col pl-45 pr-45 h-screen">
+              <div className="flex flex-col -mx-40">
+                <ContentActionRow />
+              </div>
 
               <GeneratedChat className="ml-2 mr-2 flex-grow overflow-auto mb-10" />
-              <UserInputArea
-                className="mt-auto"
-                contentRef={contentRef as React.RefObject<HTMLDivElement>}
-              />
-              {/* {isSearchOpen && <SearchBox />}  */}
+              <div className="flex flex-col -mx-5">
+                <UserInputArea
+                  className="mt-auto bg"
+                  contentRef={contentRef as React.RefObject<HTMLDivElement>}
+                />
+              </div>
             </Content>
           </RootLayout>
         </>
       ) : (
         <SignIn />
-        //<div>SignIn</div>
       )}
     </>
   );

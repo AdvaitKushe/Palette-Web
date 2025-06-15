@@ -10,7 +10,7 @@ export const NewChat = ({ className, ...props }: ComponentProps<'button'>) => {
     }
   })
   return (
-    <ActionButton className={twMerge('flex flex-row items-center justify-center ', className)} onClick={handleNoteSelect(null)} {...props}>
+    <ActionButton className={twMerge('flex flex-row items-center justify-center border-none', className)} onClick={handleNoteSelect(null)} {...props}>
       New Chat
     </ActionButton>
   )

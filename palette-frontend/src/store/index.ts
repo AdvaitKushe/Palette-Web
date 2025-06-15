@@ -31,7 +31,7 @@ export const userIDAtom = atom<string | null>(null)
 
 export const selectedNoteIndexAtom = atom<number | null>(null)
 
-export const selectedModelAtom = atom(['OpenAI', 'chatgpt-4o-latest', 'OpenAI GPT-4o'])
+export const selectedModelAtom = atom(['OpenAI', 'gpt-4.1', 'OpenAI GPT-4.1'])
 
 export const isWaitingForResponseAtom = atom<boolean>(false)
 

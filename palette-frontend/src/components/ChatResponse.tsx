@@ -8,6 +8,8 @@ import { CopyButtonInChat } from "./buttons/CopyButtonInChat";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useAtomValue } from "jotai";
 import { streamedResponseAtom } from "../store";
+import TableEditor from "./TableEditor";
+import remarkGfm from "remark-gfm";
 
 const CodeBlockAlt = memo(({ code }: { code: string }) => {
   return (
@@ -70,9 +72,15 @@ export const ChatResponse = ({
                       [&_p]:leading-normal [&_li]:leading-normal
                       prose-headings:my-2 prose-h1:text-xl prose-h2:text-lg prose-h3:text-base
                       prose-h1:mb-2 prose-h2:mb-2 prose-h3:mb-1
-                      prose-ul:list-disc prose-ul:list-inside"
+                      prose-ul:list-disc prose-ul:list-inside
+                      prose-table:border-collapse prose-table:w-full
+                      prose-th:border prose-th:border-zinc-700 prose-th:p-2 prose-th:text-left
+                      prose-td:border prose-td:border-zinc-700 prose-td:p-2
+                      prose-tr:border-b prose-tr:border-zinc-700
+                      prose-thead:bg-zinc-800/50"
         >
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
               code: ({ children, className }) => {
                 const match = /language-(\w+)/.exec(className || "");
@@ -81,6 +89,48 @@ export const ChatResponse = ({
                 ) : (
                   <code className="bg-transparent px-1 py-0.5 rounded">{String(children)}</code>
                 );
+              },
+              table: ({ children }) => {
+                try {
+                  // First, let's extract the raw markdown from the message
+                  const rawMarkdown = typed ? currentText : String(message.conversation.response);
+
+                  // Find the table in the markdown
+                  const tableRegex = /\|[\s\S]*?\|[\s\S]*?\|[\s\S]*?\|/g;
+                  const tableMatch = rawMarkdown.match(tableRegex);
+
+                  if (!tableMatch) {
+                    return <div>No table found in the content</div>;
+                  }
+
+                  // Get the table content
+                  const tableContent = tableMatch.join("\n");
+
+                  // Split into rows and ensure we have at least a header and one data row
+                  const rows = tableContent.split("\n").filter((row) => row.trim());
+                  if (rows.length < 2) {
+                    return <div>Invalid table format</div>;
+                  }
+
+                  // Create the markdown table
+                  const headerRow = rows[0];
+                  const columnCount = (headerRow.match(/\|/g) || []).length - 1;
+
+                  if (columnCount <= 0) {
+                    return <div>Invalid table format</div>;
+                  }
+
+                  // Create the separator row
+                  const separator = `|${Array(columnCount).fill("---").join("|")}|`;
+
+                  // Combine all rows
+                  const markdownTable = `${headerRow}\n${separator}\n${rows.slice(1).join("\n")}`;
+
+                  return <TableEditor initialMarkdown={markdownTable} />;
+                } catch (error) {
+                  console.error("Error processing table:", error);
+                  return <div>Error processing table</div>;
+                }
               },
             }}
           >

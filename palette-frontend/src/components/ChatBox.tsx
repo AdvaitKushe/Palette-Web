@@ -3,7 +3,7 @@ import { DragAndDrop } from "./buttons/DragAndDrop";
 import { SendChat } from "./buttons/SendChat";
 import { type ComponentProps, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
-import { currImageArrayAtom } from "../store";
+import { currImageArrayAtom, selectedModelAtom } from "../store";
 import { useAtom } from "jotai";
 import { FileButton } from "./buttons/FileButton";
 
@@ -21,10 +21,17 @@ export const ChatBox = ({
   setMessage: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const [currImageArray, setCurrImageArray] = useAtom(currImageArrayAtom);
+  const [model] = useAtom(selectedModelAtom);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
+      // Only allow file drops if the selected model is from OpenAI
+      if (model[0] !== "OpenAI") {
+        alert("File upload is only available for OpenAI models");
+        return;
+      }
+
       if (currImageArray.length >= 1 || acceptedFiles.length > 1) {
         alert("Max one file at a time. File size limit: 4MB");
         return;
@@ -55,17 +62,18 @@ export const ChatBox = ({
         reader.readAsArrayBuffer(file);
       });
     },
-    [currImageArray]
+    [currImageArray, model]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    noClick: true, // Disable clicking on the dropzone
-    noKeyboard: true, // Disable keyboard events on the dropzone
+    noClick: true,
+    noKeyboard: true,
+    disabled: model[0] !== "OpenAI", // Disable dropzone if not OpenAI
   });
 
   return (
-    <div className="flex flex-row relative items-end w-full" {...getRootProps()} {...props}>
+    <div className="flex flex-row relative items-end w-full bg-transparent" {...getRootProps()} {...props}>
       <DragAndDrop {...getInputProps()} />
 
       <SendChat onClick={() => sendFunction(inputRef as React.RefObject<HTMLTextAreaElement>)} />
@@ -85,7 +93,11 @@ export const ChatBox = ({
           }
           className="flex-1 bg-transparent pt-3 pl-3 pr-10 outline-none resize-none whitespace-pre-wrap w-full mb-12"
           onChange={(e) => setMessage(e.currentTarget.value)}
-          placeholder="Add an API key for your selected models in the settings tab to start chatting"
+          placeholder={
+            model[0] === "OpenAI"
+              ? "Add an API key for your selected models in the settings tab to start chatting"
+              : "File upload is only available for OpenAI models"
+          }
         />
         <div className="absolute bottom-0 left-10 bottom-1 flex flex-wrap mb-2 ml-2">
           {currImageArray.map((image, index) => (

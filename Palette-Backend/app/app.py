@@ -2,6 +2,8 @@ from flask import Flask, request, Response, jsonify
 from docx import Document
 from flask_cors import CORS
 from openai import OpenAI
+from google import genai
+from google.genai import types
 import firebase_admin
 from firebase_admin import firestore
 from firebase_admin import credentials
@@ -29,6 +31,7 @@ CORS(app)
 @app.route('/')
 def index():
     return "Hello World " + socket.gethostname()
+
 
 
 @app.route('/api/stream', methods= ['GET','POST'])
@@ -82,6 +85,8 @@ def stream():
         return stream_openai(message,  context, file_data, model, settings)
     elif company == 'Anthropic':
         return stream_anthropic(message,  context, file_data, model, settings)
+    elif company == 'Google':
+        return stream_gemini(message,  context, file_data, model, settings)
 
 
 def stream_anthropic(message,  context, file_data, model, settings):
@@ -93,7 +98,7 @@ def stream_anthropic(message,  context, file_data, model, settings):
     def generate():
         with client.messages.stream(
             
-            messages=[{"role": "user", "content": "user prompt:" + message + "Context (only use the context for this chat history):" + str(context)}],
+            messages=[{"role": "user", "content": "user prompt:" + message + "Context (only use the context for this chat history):" + str(context) }],
             model=model,
             max_tokens=1000,
         ) as stream:
@@ -102,12 +107,37 @@ def stream_anthropic(message,  context, file_data, model, settings):
                 yield text
 
     return Response(generate(), mimetype='text/plain')
-        
+
+def stream_gemini(message, context, file_data, model, settings):
+    print("settings['Gemini']:", settings['Gemini'])
+    client = genai.Client(api_key=settings['Gemini'])
+
+    def generate():
+        print("message:", message)
+        print("model:", model)
+
+        try:
+            # Remove caching and directly stream the response
+            stream = client.models.generate_content_stream(
+                model=model,
+                contents=[message + "Context (only use the context for this chat history):" + str(context)]
+            )
+            for chunk in stream:
+                print("chunk:", chunk.text)
+                yield chunk.text
+                
+        except Exception as e:
+            print("Error in generate:", str(e))
+            yield f"Error: {str(e)}"
+    return Response(generate(), mimetype='text/plain')
+
+
+
     
 
 def stream_openai(message,  context, file_data, model, settings):
     # Capture the message from the request before entering generator
-   
+
     openai_client = OpenAI(api_key=settings['OpenAI'])
     
     def generate():
@@ -125,7 +155,7 @@ def stream_openai(message,  context, file_data, model, settings):
                 yield content
     
     print("Starting stream response:")
-    
+  
     return generate(), {"Content-Type": "text/plain"}
 
 
