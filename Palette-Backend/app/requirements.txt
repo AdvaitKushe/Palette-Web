@@ -2,8 +2,8 @@ flask
 flask-cors
 python-docx
 openai
-google-generativeai
 firebase-admin
 pypdf
 anthropic
 dotenv
+google-genai
