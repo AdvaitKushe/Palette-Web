@@ -11,8 +11,8 @@ export const FileButton = ({
   img: string | ArrayBuffer | null
   name: string
 }) => {
-  const [currImageArray, setCurrImageArray] = useAtom(currImageArrayAtom)
-  const imgSrc = typeof img === 'string' ? img : ''
+  const [, setCurrImageArray] = useAtom(currImageArrayAtom)
+  //const imgSrc = typeof img === 'string' ? img : ''
 
   return (
     <div

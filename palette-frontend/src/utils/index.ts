@@ -1,5 +1,5 @@
 import { type userInput } from '../../shared/model'
-
+// @ts-ignore
 
 
 export const handleKeyDown = (
@@ -65,11 +65,11 @@ export const sendFunction = (
   addMessage: (message: string) => void,
   message: string,
   selectedNoteIndex: number | null,
-  setMessage: React.Dispatch<React.SetStateAction<string>>,
-  setCurrImageArray: React.Dispatch<React.SetStateAction<{imageData: ArrayBuffer | string | null, name: string}[]>>,
+  _setMessage: React.Dispatch<React.SetStateAction<string>>,
+  _setCurrImageArray: React.Dispatch<React.SetStateAction<{imageData: ArrayBuffer | string | null, name: string}[]>>,
   contentRef: React.RefObject<HTMLDivElement> | undefined,
   model: string[],
-  userId: string | null,
+  _userId: string | null,
   
 ) => {
   return async () => {

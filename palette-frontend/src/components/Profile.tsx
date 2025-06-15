@@ -9,7 +9,7 @@ export const Profile = ({ className }: ComponentProps<'div'>) => {
   const buttonRef = useRef<HTMLDivElement>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [user, setUser] = useAtom(userAtom)
-  const [, setImageError] = useState(false)
+
   const [, setToken] = useAtom(tokenAtom)
 
   const toggleDropdown = () => {
@@ -34,7 +34,7 @@ export const Profile = ({ className }: ComponentProps<'div'>) => {
           src={profileImage}
           alt="Profile"
           className="profile-image rounded-full w-8 h-8"
-          onError={(e) => {
+          onError={() => {
             //e.currentTarget.src = '/default-avatar.png'
             //setImageError(true)
           }}
