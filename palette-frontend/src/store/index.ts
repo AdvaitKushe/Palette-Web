@@ -94,7 +94,7 @@ export const createNewNoteAtom = atom(
 
     // Web-compatible streaming
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/stream', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -202,7 +202,7 @@ export const addMessageAtom = atom(
       let fullResponse = '';
 
       try {
-        const response = await fetch('http://127.0.0.1:5001/api/stream', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stream`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
