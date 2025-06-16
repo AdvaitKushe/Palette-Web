@@ -16,6 +16,7 @@ import os
 import io
 from dotenv import load_dotenv
 from pathlib import Path
+from io import BytesIO
 
 
 env_path =  './.env'
@@ -100,7 +101,6 @@ def stream():
             #print("file_data:", file_data['all_text'])
             
     
-
     
     
 
@@ -214,15 +214,18 @@ class FileProcessor:
             else:
                 file_data = base64.b64decode(base64_data)
 
-            # Generate unique filename
-            import uuid
-            filename = f"{str(uuid.uuid4())}{file_extension}"
+            # Process file data in memory
+            file_stream = BytesIO(file_data)
             
-            # Save file
-            with open(filename, 'wb') as f:
-                f.write(file_data)
+            # If you need to process the file (e.g., image processing)
+            # You can do it here with file_stream
             
-            return filename
+            # If you need to return the processed data as base64
+            processed_data = base64.b64encode(file_stream.getvalue()).decode('utf-8')
+            return processed_data
+            
+            # Or if you need to return the raw bytes
+            # return file_stream.getvalue()
         except Exception as e:
             raise Exception(f"Error processing file: {str(e)}")
 
