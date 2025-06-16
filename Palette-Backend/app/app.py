@@ -118,7 +118,7 @@ def stream_anthropic(message,  context, file_data, model, settings):
     def generate():
         with client.messages.stream(
             
-            messages=[{"role": "user", "content": "user prompt:" + message + "Context (only use the context for this chat history):" + str(context) }],
+            messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context) }],
             model=model,
             max_tokens=1000,
         ) as stream:
@@ -140,7 +140,7 @@ def stream_gemini(message, context, file_data, model, settings):
             # Remove caching and directly stream the response
             stream = client.models.generate_content_stream(
                 model=model,
-                contents=[message + "Context (only use the context for this chat history):" + str(context)]
+                contents=[message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)]
             )
             for chunk in stream:
                 print("chunk:", chunk.text)
@@ -163,7 +163,7 @@ def stream_openai(message,  context, file_data, model, settings):
     def generate():
         stream = openai_client.chat.completions.create(
             model=model,  # Fixed model name from "gpt-4o"
-            messages=[{"role": "user", "content": "user prompt:" + message + "Context (only use the context for this chat history):" + str(context)}],  # Use captured message
+            messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)}],  # Use captured message
             stream=True,
         )
 
@@ -269,7 +269,7 @@ def handle_image(img, prompt, context, settings):
         {
             "role": "user",
             "content": [
-                { "type": "text", "text": prompt + "Context (only use the context for this chat history):" + str(context) },
+                { "type": "text", "text": prompt + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context) },
                 {
                     "type": "image_url",
                     "image_url": {
