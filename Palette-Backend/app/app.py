@@ -241,10 +241,10 @@ def handle_file_load(raw_file_data, prompt, context, settings):
             file_specs = upload_file(file)
          
             if file_specs['file_type'] == 'application/pdf':
-                text = extract_pdf_text(file_specs['file_path'])
+                text = extract_pdf_text(file)
                 all_text.append(text['text'])
             elif file_specs['file_type'] == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                text = extract_docx_text(file_specs['file_path'])
+                text = extract_docx_text(file)
                 print("text:", text)
                 all_text.append(text['text'])
             else:
@@ -342,19 +342,27 @@ def handle_imgage(img):
 
 
 
-def extract_pdf_text(path):
+def extract_pdf_text(file_data):
     print("ENTERED EXTRACT PDF TEXT")
-    file_path = "./" + path
-    print("file_path:", file_path)
-    reader = PdfReader(file_path)
+    from io import BytesIO
+    # Handle base64 encoded string if needed
+    if isinstance(file_data, str) and file_data.startswith('data:'):
+        import base64
+        file_data = base64.b64decode(file_data.split(',')[1])
+    reader = PdfReader(BytesIO(file_data))
     text = ''
     for page in reader.pages:
         text += page.extract_text()
     return {"text": text}
 
-def extract_docx_text(file_path):
+def extract_docx_text(file_data):
     print("ENTERED EXTRACT DOCX TEXT")
-    doc = Document(file_path)
+    from io import BytesIO
+    # Handle base64 encoded string if needed
+    if isinstance(file_data, str) and file_data.startswith('data:'):
+        import base64
+        file_data = base64.b64decode(file_data.split(',')[1])
+    doc = Document(BytesIO(file_data))
     text = ''
     for paragraph in doc.paragraphs:
         text += paragraph.text + '\n'

@@ -73,7 +73,11 @@ export const ChatBox = ({
   });
 
   return (
-    <div className="flex flex-row relative items-end w-full bg-transparent" {...getRootProps()} {...props}>
+    <div
+      className="flex flex-row relative items-end w-full bg-transparent"
+      {...getRootProps()}
+      {...props}
+    >
       <DragAndDrop {...getInputProps()} />
 
       <SendChat onClick={() => sendFunction(inputRef as React.RefObject<HTMLTextAreaElement>)} />
@@ -101,7 +105,16 @@ export const ChatBox = ({
         />
         <div className="absolute bottom-0 left-10 bottom-1 flex flex-wrap mb-2 ml-2">
           {currImageArray.map((image, index) => (
-            <FileButton key={index} img={image.imageData} name={image.name} />
+            <FileButton
+              key={index}
+              img={{
+                data: image.imageData as string,
+                name: image.name,
+                type: image.name.split(".").pop() || "txt",
+              }}
+              name={image.name}
+              type={image.name.split(".").pop() || "txt"}
+            />
           ))}
         </div>
       </div>
