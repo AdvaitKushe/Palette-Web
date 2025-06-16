@@ -13,7 +13,6 @@ import json
 import socket
 import base64
 import os
-import io
 from dotenv import load_dotenv
 from pathlib import Path
 from io import BytesIO
@@ -86,14 +85,12 @@ def stream():
         #print("entered")
         
         file_data = handle_file_load(file_data, message, context, settings)
-       
+      
         type_file = file_data['all_paths'][0].split('.')[-1]
         print("type_file:", type_file)
         
         context.append({"files": file_data['all_text']})
-        for file in file_data['all_paths']:
-            print("file:", file)
-            os.remove(file)
+        
         
         if type_file == 'jpeg' or type_file == 'png' or type_file == 'gif':
             return Response(file_data['all_text'], mimetype='text/plain')
