@@ -106,6 +106,7 @@ export const ChatBox = ({
         <div className="absolute bottom-0 left-10 bottom-1 flex flex-wrap mb-2 ml-2">
           {currImageArray.map((image, index) => (
             <FileButton
+            
               key={index}
               img={{
                 data: image.imageData as string,

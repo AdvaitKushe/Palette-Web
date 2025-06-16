@@ -28,17 +28,17 @@ export const ChatPage = () => {
         <>
           <RootLayout className="">
             <Sidebar className="relative bg-black/30 backdrop-blur-sm border-r border-purple-500/20 mt-0 no-scrollbar">
-              <div className="flex items-center gap-2 px-4 py-2 mb-5">
-                <span className="text-white/70 text-2xl sm:text-3xl md:text-4xl font-bold ml-10 ">
+              <div className="flex items-center gap-2 px-2 sm:px-4 py-2 mb-3 sm:mb-5">
+                <span className="text-white/70 text-2xl sm:text-3xl md:text-4xl font-bold ml-2 sm:ml-6 md:ml-10">
                   Palette
                 </span>
                 <img
                   src="./LogoMain.png"
                   alt="Palette Logo"
-                  className="w-10 h-10 rounded-full"
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full"
                 />
               </div>
-              
+
               <SideBarActionRow className="left-[200px] z-10 rounded-full" />
               <ChatHistory
                 className="h-full mt-7"

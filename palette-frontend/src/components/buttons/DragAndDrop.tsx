@@ -14,7 +14,7 @@ export const DragAndDrop = ({
       )}
       onClick={onClick}
     >
-      <i className="bi bi-plus-md cursor-pointer"></i>
+      <i className="bi bi-paperclip cursor-pointer"></i>
       <input {...props} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
     </div>
   );
