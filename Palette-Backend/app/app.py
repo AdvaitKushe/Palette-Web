@@ -66,7 +66,6 @@ def stream():
     file_data = request.json['files']
     print("file_data:", file_data)
    
-    
     model = request.json['model']
     company = request.json['company']
 
@@ -74,63 +73,74 @@ def stream():
     doc_ref = db.collection("users").document(id)
 
     doc = doc_ref.get()
-        # Access the settings field from the document
+    # Access the settings field from the document
     if doc.exists:
         doc_data = doc.to_dict()
-        settings =doc_data.get('settings')  # or doc_data['settings'] if you're sure it exists
+        settings = doc_data.get('settings')  # or doc_data['settings'] if you're sure it exists
     else:
         print("Document does not exist")
+        return Response("Error: User settings not found", mimetype='text/plain')
+
+    # Check for API keys
+    if company == 'OpenAI' and (not settings.get('OpenAI') or settings['OpenAI'].strip() == ''):
+        return Response("Please provide a valid OpenAI API key in settings to begin chatting", mimetype='text/plain')
+    elif company == 'Anthropic' and (not settings.get('Anthropic') or settings['Anthropic'].strip() == ''):
+        return Response("Please provide a valid Anthropic API key in settings to begin chatting", mimetype='text/plain')
+    elif company == 'Google' and (not settings.get('Gemini') or settings['Gemini'].strip() == ''):
+        return Response("Please provide a valid Gemini API key in settings to begin chatting", mimetype='text/plain')
 
     if file_data:
-        #print("entered")
-        
         file_data = handle_file_load(file_data, message, context, settings)
-      
         type_file = file_data['all_paths'][0].split('.')[-1]
         print("type_file:", type_file)
-        
         context.append({"files": file_data['all_text']})
-        
         
         if type_file == 'jpeg' or type_file == 'png' or type_file == 'gif':
             return Response(file_data['all_text'], mimetype='text/plain')
-        
-            #print("file_data:", file_data['all_text'])
-            
-    
-    
-    
 
     if company == 'OpenAI':
-        return stream_openai(message,  context, file_data, model, settings)
+       # return "Incorrect API key provided. You can find your API key at https://platform.openai.com/account/api-keys."
+        return stream_openai(message, context, file_data, model, settings)
     elif company == 'Anthropic':
-        return stream_anthropic(message,  context, file_data, model, settings)
+        return stream_anthropic(message, context, file_data, model, settings)
     elif company == 'Google':
-        return stream_gemini(message,  context, file_data, model, settings)
+        return stream_gemini(message, context, file_data, model, settings)
 
 
 def stream_anthropic(message,  context, file_data, model, settings):
-    client = anthropic.Anthropic(
+    try:
+        client = anthropic.Anthropic(
                 # defaults to os.environ.get("ANTHROPIC_API_KEY")
                 api_key=settings['Anthropic'],
-            )
+        )
+    except Exception as e:
+        print("Error initializing Anthropic client:", str(e))
+        return str(e.response.json()['error']['message'])
 
     def generate():
-        with client.messages.stream(
-            
-            messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context) }],
-            model=model,
-            max_tokens=1000,
-        ) as stream:
-            for text in stream.text_stream:
+        try:    
+            with client.messages.stream(
                 
-                yield text
+                messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context) }],
+                model=model,
+                max_tokens=1000,
+            ) as stream:
+                for text in stream.text_stream:
+                    
+                    yield text
+        except Exception as e:
+            print("Error in generate:", str(e))
+            yield f"Error: {str(e.response.json()['error']['message'])}"
 
     return Response(generate(), mimetype='text/plain')
 
 def stream_gemini(message, context, file_data, model, settings):
     print("settings['Gemini']:", settings['Gemini'])
-    client = genai.Client(api_key=settings['Gemini'])
+    try:
+        client = genai.Client(api_key=settings['Gemini'])
+    except Exception as e:
+        print("Error initializing Gemini client:", str(e))
+        return str(e.response.json()['error']['message'])
 
     def generate():
         print("message:", message)
@@ -148,7 +158,7 @@ def stream_gemini(message, context, file_data, model, settings):
                 
         except Exception as e:
             print("Error in generate:", str(e))
-            yield f"Error: {str(e)}"
+            yield f"Error: {str(e.response.json()['error']['message'])}"
     return Response(generate(), mimetype='text/plain')
 
 
@@ -157,16 +167,24 @@ def stream_gemini(message, context, file_data, model, settings):
 
 def stream_openai(message,  context, file_data, model, settings):
     # Capture the message from the request before entering generator
-
-    openai_client = OpenAI(api_key=settings['OpenAI'])
+    #return Response("Incorrect API key provided. You can find your API key at https://platform.openai.com/account/api-keys.", mimetype='text/plain')
+    try:
+        openai_client = OpenAI(api_key=settings['OpenAI'])
+    except Exception as e:
+        print("Error initializing OpenAI client:", str(e))
+        return str(e.response.json()['error']['message'])
     
     def generate():
-        stream = openai_client.chat.completions.create(
-            model=model,  # Fixed model name from "gpt-4o"
-            messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)}],  # Use captured message
-            stream=True,
-        )
-
+        try:
+            stream = openai_client.chat.completions.create(
+                model=model,  # Fixed model name from "gpt-4o"
+                messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)}],  # Use captured message
+                stream=True,
+            )
+        except Exception as e:
+            print("Error in OpenAI stream:", str(e))
+            yield f"Error: {str(e.response.json()['error']['message'])}"
+            
         for chunk in stream:
             if chunk.choices[0].delta.content is not None:
                 content = chunk.choices[0].delta.content

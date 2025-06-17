@@ -99,14 +99,17 @@ export const ChatBox = ({
           onChange={(e) => setMessage(e.currentTarget.value)}
           placeholder={
             model[0] === "OpenAI"
-              ? "Add an API key for your selected models in the settings tab to start chatting"
+              ? "Please provide a valid OpenAI API key in settings to begin chatting"
+              : model[0] === "Anthropic"
+              ? "Please provide a valid Anthropic API key in settings to begin chatting"
+              : model[0] === "Google"
+              ? "Please provide a valid Gemini API key in settings to begin chatting"
               : "File upload is only available for OpenAI models"
           }
         />
         <div className="absolute bottom-0 left-10 bottom-1 flex flex-wrap mb-2 ml-2">
           {currImageArray.map((image, index) => (
             <FileButton
-            
               key={index}
               img={{
                 data: image.imageData as string,
