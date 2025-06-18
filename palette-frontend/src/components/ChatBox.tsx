@@ -3,9 +3,15 @@ import { DragAndDrop } from "./buttons/DragAndDrop";
 import { SendChat } from "./buttons/SendChat";
 import { type ComponentProps, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
-import { currImageArrayAtom, selectedModelAtom } from "../store";
+import {
+  currImageArrayAtom,
+  selectedModelAtom,
+  modelSearchCapabilityAtom,
+  searchEnabledAtom,
+} from "../store";
 import { useAtom } from "jotai";
 import { FileButton } from "./buttons/FileButton";
+import { SearchButton } from "./buttons/SearchButton";
 
 export const ChatBox = ({
   className,
@@ -22,6 +28,8 @@ export const ChatBox = ({
 }) => {
   const [currImageArray, setCurrImageArray] = useAtom(currImageArrayAtom);
   const [model] = useAtom(selectedModelAtom);
+  const [searchCapability] = useAtom(modelSearchCapabilityAtom);
+  const [searchEnabled] = useAtom(searchEnabledAtom);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const onDrop = useCallback(
@@ -63,15 +71,16 @@ export const ChatBox = ({
     onDrop,
     noClick: true,
     noKeyboard: true,
+    disabled: searchEnabled,
   });
 
   return (
     <div
       className="flex flex-row relative items-end w-full bg-transparent"
-      {...getRootProps()}
+      {...(searchEnabled ? {} : getRootProps())}
       {...props}
     >
-      <DragAndDrop {...getInputProps()} />
+      {!searchEnabled && <DragAndDrop {...getInputProps()} />}
 
       <SendChat onClick={() => sendFunction(inputRef as React.RefObject<HTMLTextAreaElement>)} />
 
@@ -100,19 +109,28 @@ export const ChatBox = ({
               : "Type your message here..."
           }
         />
-        <div className="absolute bottom-0 left-10 bottom-1 flex flex-wrap mb-2 ml-2">
-          {currImageArray.map((image, index) => (
-            <FileButton
-              key={index}
-              img={{
-                data: image.imageData as string,
-                name: image.name,
-                type: image.name.split(".").pop() || "txt",
-              }}
-              name={image.name}
-              type={image.name.split(".").pop() || "txt"}
-            />
-          ))}
+        <div className="absolute bottom-0 left-10 bottom-1 flex flex-wrap mb-2 ml-2 items-center justify-center gap-2">
+          {searchCapability && !searchEnabled && <SearchButton model={model} />}
+
+          {searchEnabled && searchCapability && (
+            <div className="absolute  bottom-1 right-[-45px] top-[-28px] ">
+              <SearchButton model={model} />
+            </div>
+          )}
+
+          {!searchEnabled &&
+            currImageArray.map((image, index) => (
+              <FileButton
+                key={index}
+                img={{
+                  data: image.imageData as string,
+                  name: image.name,
+                  type: image.name.split(".").pop() || "txt",
+                }}
+                name={image.name}
+                type={image.name.split(".").pop() || "txt"}
+              />
+            ))}
         </div>
       </div>
     </div>

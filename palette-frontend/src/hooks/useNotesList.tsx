@@ -1,4 +1,4 @@
-import { notesAtom, selectedNoteIndexAtom, isWaitingForResponseAtom,  } from '../store'
+import { notesAtom, selectedNoteIndexAtom, isWaitingForResponseAtom, searchEnabledAtom,  } from '../store'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 
 export const useNotesList = ({ onSelect }: { onSelect?: () => void }) => {
@@ -6,6 +6,7 @@ export const useNotesList = ({ onSelect }: { onSelect?: () => void }) => {
 
   const [selectedNoteIndex, setSelectedNoteIndex] = useAtom(selectedNoteIndexAtom)
   const setIsWaitingForResponse = useSetAtom(isWaitingForResponseAtom)
+  const setSearchEnabled = useSetAtom(searchEnabledAtom)
   //const setCurrImageArray = useSetAtom(currImageArrayAtom)
   //async function to set the selected node index set the value of selectedNoteIndex
   const handleNoteSelect = (index: number | null) => async () => {
@@ -15,6 +16,7 @@ export const useNotesList = ({ onSelect }: { onSelect?: () => void }) => {
     if (index === null) {
       setSelectedNoteIndex(null)
       setIsWaitingForResponse(false)
+      setSearchEnabled(false)
       if (onSelect) {
         onSelect()
       }

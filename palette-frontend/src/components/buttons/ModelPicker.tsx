@@ -3,10 +3,11 @@ import { twMerge } from "tailwind-merge";
 import { ActionButton } from "./ActionButton";
 import { ModelDropdown } from "./ModelDropdown";
 import { useAtom } from "jotai";
-import { selectedModelAtom } from "../../store";
+import { selectedModelAtom, modelSearchCapabilityAtom } from "../../store";
 
 export const ModelPicker = ({ className, ...props }: ComponentProps<"div">) => {
   const [model, setModel] = useAtom(selectedModelAtom);
+  const [, setSearchCapability] = useAtom(modelSearchCapabilityAtom);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -23,9 +24,13 @@ export const ModelPicker = ({ className, ...props }: ComponentProps<"div">) => {
     };
   }, []);
 
-  const handleModelSelect = (model: string[], company: string) => {
-    // model[0] is the model name, model[1] is the model id
-    setModel([company, model[1], `${company} ${model[0]}`]);
+  const handleModelSelect = (
+    modelInfo: [string, string, boolean, boolean, boolean],
+    company: string
+  ) => {
+    // modelInfo[0] is the model name, modelInfo[1] is the model id, modelInfo[4] is search capability
+    setModel([company, modelInfo[1], `${company} ${modelInfo[0]}`]);
+    setSearchCapability(modelInfo[4]);
     setIsOpen(false);
   };
 

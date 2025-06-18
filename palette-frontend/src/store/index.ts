@@ -35,6 +35,10 @@ export const selectedModelAtom = atom(['OpenAI', 'gpt-4.1', 'OpenAI GPT-4.1'])
 
 export const isWaitingForResponseAtom = atom<boolean>(false)
 
+export const modelSearchCapabilityAtom = atom<boolean>(false)
+
+export const searchEnabledAtom = atom<boolean>(false)
+
 
 
 export const deleteNoteAtom = atom(null, async (get, set, index: number) => {
@@ -105,7 +109,8 @@ export const createNewNoteAtom = atom(
           model: model[1],
           id: userId,
           context: [],
-          files: currImageArray
+          files: currImageArray,
+          search: get(searchEnabledAtom)
         })
       });
 
@@ -142,11 +147,12 @@ export const createNewNoteAtom = atom(
 
     // Update both database and UI
     await updateDoc(doc(db, "users/" + userId + "/chats/" + res.id), {
-      messages: updatedMessages
+      messages: updatedMessages,
+      lastEditTime: Date.now()
     })
 
     set(notesAtom, [
-      { ...newNote, messages: updatedMessages },
+      { ...newNote, messages: updatedMessages, lastEditTime: Date.now() },
       ...notes.slice(1)
     ])
   }
@@ -211,6 +217,7 @@ export const addMessageAtom = atom(
             prompt: message,
             company: model[0],
             model: model[1],
+            search: get(searchEnabledAtom),
             id: userId,
             context: notes[selectedNoteIndex]
               ?.messages
@@ -255,10 +262,13 @@ export const addMessageAtom = atom(
       
       // Batch final updates
       await Promise.all([
-        updateDoc(docRef, { messages: finalMessages }),
+        updateDoc(docRef, { 
+          messages: finalMessages,
+          lastEditTime: Date.now()
+        }),
         set(notesAtom, notes.map((note, i) => 
           i === selectedNoteIndex 
-            ? { ...note, messages: finalMessages }
+            ? { ...note, messages: finalMessages, lastEditTime: Date.now() }
             : note
         ))
       ])

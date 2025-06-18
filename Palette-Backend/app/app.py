@@ -4,6 +4,7 @@ from flask_cors import CORS
 from openai import OpenAI
 from google import genai
 from google.genai import types
+from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
 import firebase_admin
 from firebase_admin import firestore
 from firebase_admin import credentials
@@ -50,7 +51,7 @@ db = firestore.client()
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:5173"])
 @app.route('/')
 def index():
     return "Hello World " + socket.gethostname()
@@ -64,7 +65,7 @@ def stream():
     context = request.json['context']
 
     file_data = request.json['files']
-    
+    search = request.json['search']
    
     model = request.json['model']
     company = request.json['company']
@@ -103,9 +104,9 @@ def stream():
        # return "Incorrect API key provided. You can find your API key at https://platform.openai.com/account/api-keys."
         return stream_openai(message, context, file_data, model, settings)
     elif company == 'Anthropic':
-        return stream_anthropic(message, context, file_data, model, settings)
+        return stream_anthropic(message, context, file_data, model, settings) if not search else stream_anthropic_search(message, context, file_data, model, settings)
     elif company == 'Google':
-        return stream_gemini(message, context, file_data, model, settings)
+        return stream_gemini(message, context, file_data, model, settings) if not search else stream_gemini_search(message, context, file_data, model, settings)
 
 
 def stream_anthropic(message,  context, file_data, model, settings):
@@ -125,6 +126,7 @@ def stream_anthropic(message,  context, file_data, model, settings):
                 messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context) }],
                 model=model,
                 max_tokens=1000,
+                
             ) as stream:
                 for text in stream.text_stream:
                     
@@ -135,8 +137,73 @@ def stream_anthropic(message,  context, file_data, model, settings):
 
     return Response(generate(), mimetype='text/plain')
 
+def stream_anthropic_search(message,  context, file_data, model, settings):
+    try:
+        client = anthropic.Anthropic(
+                # defaults to os.environ.get("ANTHROPIC_API_KEY")
+                api_key=settings['Anthropic'],
+        )
+    except Exception as e:
+        print("Error initializing Anthropic client:", str(e))
+        return str(e.response.json()['error']['message'])
+
+    def generate():
+        try:    
+            with client.messages.stream(
+                
+                messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context) }],
+                model=model,
+                max_tokens=1000,
+                tools=[{
+        "type": "web_search_20250305",
+        "name": "web_search",
+        
+    }]
+                
+            ) as stream:
+                for text in stream.text_stream:
+                    
+                    yield text
+        except Exception as e:
+            print("Error in generate:", str(e))
+            yield f"Error: {str(e.response.json()['error']['message'])}"
+
+    return Response(generate(), mimetype='text/plain')
+
+def stream_gemini_search(message, context, file_data, model, settings):
+   
+    try:
+        client = genai.Client(api_key=settings['Gemini'])
+        google_search_tool = Tool(
+         google_search = GoogleSearch()
+        )
+    except Exception as e:
+        print("Error initializing Gemini client:", str(e))
+        return str(e.response.json()['error']['message'])
+
+    def generate():
+       
+        try:
+            # Remove caching and directly stream the response
+            stream = client.models.generate_content_stream(
+                model=model,
+                contents=[message + ". Provide all sources and links to the sources in the response. Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)],
+                config=GenerateContentConfig(
+        tools=[google_search_tool],
+        response_modalities=["TEXT"],
+    )
+            )
+            for chunk in stream:
+               
+                yield chunk.text
+                
+        except Exception as e:
+            print("Error in generate:", str(e))
+            yield f"Error: {str(e.response.json()['error']['message'])}"
+    return Response(generate(), mimetype='text/plain')
+
 def stream_gemini(message, context, file_data, model, settings):
-    print("settings['Gemini']:", settings['Gemini'])
+   
     try:
         client = genai.Client(api_key=settings['Gemini'])
     except Exception as e:
@@ -144,8 +211,7 @@ def stream_gemini(message, context, file_data, model, settings):
         return str(e.response.json()['error']['message'])
 
     def generate():
-        print("message:", message)
-        print("model:", model)
+       
 
         try:
             # Remove caching and directly stream the response
@@ -154,7 +220,7 @@ def stream_gemini(message, context, file_data, model, settings):
                 contents=[message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)]
             )
             for chunk in stream:
-                print("chunk:", chunk.text)
+               
                 yield chunk.text
                 
         except Exception as e:
@@ -178,7 +244,8 @@ def stream_openai(message,  context, file_data, model, settings):
     def generate():
         try:
             stream = openai_client.chat.completions.create(
-                model=model,  # Fixed model name from "gpt-4o"
+                model=model,
+                      
                 messages=[{"role": "user", "content": "user prompt:" + message + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)}],  # Use captured message
                 stream=True,
             )
@@ -189,6 +256,7 @@ def stream_openai(message,  context, file_data, model, settings):
         for chunk in stream:
             if chunk.choices[0].delta.content is not None:
                 content = chunk.choices[0].delta.content
+                print(chunk.choices[0].delta)
                 
                 #print(content, end='', flush=True)  # Print each chunk as it arrives
                 yield content
@@ -273,7 +341,7 @@ def handle_file_load(raw_file_data, prompt, model, company, context, settings):
             print("file_specs['file_path']:", file_specs['file_path'])
             
             
-    print("all_paths:", all_paths)
+    
     return {"message": "Files uploaded successfully", "all_text": all_text, "all_paths": all_paths}
 
 def handle_image(img, model, company, prompt, context, settings):
@@ -290,7 +358,7 @@ def handle_image(img, model, company, prompt, context, settings):
 
 def handle_image_openai(img, model, prompt, context, settings):
     client = OpenAI(api_key=settings['OpenAI'])
-    print("img[0]:", img[0])
+   
     completion = client.chat.completions.create(
     model=model,
   
@@ -311,7 +379,7 @@ def handle_image_openai(img, model, prompt, context, settings):
     )
 
 
-    print(completion.choices[0].message.content)
+   
     return completion.choices[0].message.content
 
 def handle_image_anthropic(img, model, prompt, context, settings):
@@ -351,7 +419,7 @@ def handle_image_anthropic(img, model, prompt, context, settings):
             }
         ],
     )
-    print("message:", message)
+   
     return message.content[0].text
 
 
@@ -379,13 +447,13 @@ def handle_image_gemini(img, model, prompt, context, settings):
     ]
   )
 
-    print("response.text:", response.text)
+  
     return response.text
 
 def upload_file(file):
     try:
         # Get the base64 data from request
-        print("entered2")
+        
         data = file
         print(data)
         if not data:
@@ -428,13 +496,6 @@ def upload_file(file):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
-def handle_imgage(img):
-    print("entered handle_imgage")
-    print(img)
-    return {"message": "Image processed successfully"}
-
 
 
 def extract_pdf_text(file_data):
@@ -489,7 +550,7 @@ format '[1,2],[3,4],[5,6]' and prints the transpose in the same format.
     ]
     )
 
-    print(response.choices[0].message.content)
+   
     return jsonify({"response": response.choices[0].message.content, "company": "openai"}), 200
  
 
@@ -507,7 +568,7 @@ def limit_context(context_array, max_chars=2000):
             response_len = len(str(item['response']))
         if 'files' in item:
             files_len = len(str(item['files']))
-            print("files_len:", files_len)
+            
 
         item_length = prompt_len + response_len + files_len
         if total_chars + item_length <= max_chars:

@@ -2,45 +2,44 @@ import { type ComponentProps, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { ActionButton } from "./ActionButton";
 
-type ModelInfo = [string, string, boolean, boolean]; // [name, id, supportsImages, supportsDocuments]
+type ModelInfo = [string, string, boolean, boolean, boolean]; // [name, id, supportsImages, supportsDocuments, supportsSearch]
 
 export const ModelDropdown = ({
   className,
   onModelSelect,
   ...props
-}: ComponentProps<"div"> & { onModelSelect: (model: string[], company: string) => void }) => {
+}: ComponentProps<"div"> & { onModelSelect: (model: ModelInfo, company: string) => void }) => {
   const [showAll, setShowAll] = useState(false);
 
   const models: Record<string, ModelInfo[]> = {
     OpenAI: [
-      ["GPT-4.1", "gpt-4.1", true, true],
-      ["GPT-4o", "chatgpt-4o-latest", true, true],
+      ["GPT-4.1", "gpt-4.1", true, true, false],
+      ["GPT-4o", "chatgpt-4o-latest", true, true, true],
       ...(showAll
         ? ([
-            ["GPT-o4 mini", "o4-mini", true, true],
-            ["GPT-o3 mini", "o3-mini", true, true],
-            ["GPT-o1", "o1", true, true],
+            ["GPT-o4 mini", "o4-mini", true, true, true],
+            ["GPT-o3 mini", "o3-mini", true, true, false],
+            ["GPT-o1", "o1", true, true, false],
           ] as ModelInfo[])
         : []),
     ],
     Anthropic: [
-      ["Claude Sonnet 4", "claude-sonnet-4-20250514", true, true],
-      ["Claude Opus 4", "claude-opus-4-20250514", true, true],
+      ["Claude Sonnet 4", "claude-sonnet-4-20250514", true, true, true],
+      ["Claude Opus 4", "claude-opus-4-20250514", true, true, true],
       ...(showAll
         ? ([
-            ["Claude 3.7 Sonnet", "claude-3-7-sonnet-latest", true, true],
-            ["Claude 3.7 haiku", "claude-3-7-haiku-latest", true, true],
+            ["Claude 3.7 Sonnet", "claude-3-7-sonnet-latest", true, true, true],
+            ["Claude 3.7 Haiku", "claude-3-7-haiku-latest", true, true, false],
           ] as ModelInfo[])
         : []),
     ],
     Google: [
-      ["Gemini 2.5 Flash", "gemini-2.5-flash-preview-05-20", true, true],
-      ["Gemini 2.0 Flash", "gemini-2.0-flash", true, true],
+      ["Gemini 2.5 Flash", "gemini-2.5-flash-preview-05-20", true, true, true],
+      ["Gemini 2.0 Flash", "gemini-2.0-flash", true, true, true],
       ...(showAll
         ? ([
-            ["Gemini 2.5 Flash Lite", "gemini-2.5-flash-lite-preview-06-17", true, true],
-            ["Gemini 2.0 Flash Lite", "gemini-2.0-flash-lite", true, true],
-            ["Gemini 1.5 Flash", "gemini-1.5-flash", true, true],
+            
+            ["Gemini 1.5 Flash", "gemini-1.5-flash", true, true, false],
           ] as ModelInfo[])
         : []),
     ],
@@ -55,7 +54,7 @@ export const ModelDropdown = ({
             <button
               key={model[1]}
               className="flex flex-row items-center gap-2 px-2 py-1.5 text-sm text-white/70 hover:text-white hover:bg-zinc-700/50 rounded-md transition-colors duration-200"
-              onClick={() => onModelSelect([model[0], model[1]], company)}
+              onClick={() => onModelSelect(model, company)}
             >
               <i className="bi bi-robot text-sm"></i>
               <span className="flex-1 text-left">{model[0]}</span>
@@ -68,6 +67,9 @@ export const ModelDropdown = ({
                     className="bi bi-file-earmark-text text-xs text-green-400"
                     title="Supports documents"
                   ></i>
+                )}
+                {model[4] && (
+                  <i className="bi bi-search text-xs text-blue-400" title="Supports search"></i>
                 )}
               </div>
             </button>
