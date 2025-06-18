@@ -29,7 +29,7 @@ export const ModelDropdown = ({
       ...(showAll
         ? ([
             ["Claude 3.7 Sonnet", "claude-3-7-sonnet-latest", true, true, true],
-            ["Claude 3.7 Haiku", "claude-3-7-haiku-latest", true, true, false],
+            ["Claude 3.5 Haiku", "claude-3-5-haiku-20241022", true, true, false],
           ] as ModelInfo[])
         : []),
     ],

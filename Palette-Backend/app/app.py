@@ -256,7 +256,7 @@ def stream_openai(message,  context, file_data, model, settings):
         for chunk in stream:
             if chunk.choices[0].delta.content is not None:
                 content = chunk.choices[0].delta.content
-                print(chunk.choices[0].delta)
+             
                 
                 #print(content, end='', flush=True)  # Print each chunk as it arrives
                 yield content

@@ -2,12 +2,13 @@ import { type ComponentProps, useState, useEffect, useRef } from "react";
 import { twMerge } from "tailwind-merge";
 import { ActionButton } from "./ActionButton";
 import { ModelDropdown } from "./ModelDropdown";
-import { useAtom } from "jotai";
-import { selectedModelAtom, modelSearchCapabilityAtom } from "../../store";
+import { useAtom, useSetAtom } from "jotai";
+import { selectedModelAtom, modelSearchCapabilityAtom, searchEnabledAtom } from "../../store";
 
 export const ModelPicker = ({ className, ...props }: ComponentProps<"div">) => {
   const [model, setModel] = useAtom(selectedModelAtom);
   const [, setSearchCapability] = useAtom(modelSearchCapabilityAtom);
+  const setSearchEnabled = useSetAtom(searchEnabledAtom)
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +33,7 @@ export const ModelPicker = ({ className, ...props }: ComponentProps<"div">) => {
     setModel([company, modelInfo[1], `${company} ${modelInfo[0]}`]);
     setSearchCapability(modelInfo[4]);
     setIsOpen(false);
+    setSearchEnabled(false)
   };
 
   return (
