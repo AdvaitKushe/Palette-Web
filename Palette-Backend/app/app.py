@@ -51,7 +51,7 @@ db = firestore.client()
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"])
+CORS(app, origins=["http://localhost:5173", "https://www.palette-chat.com/"])
 @app.route('/')
 def index():
     return "Hello World " + socket.gethostname()
