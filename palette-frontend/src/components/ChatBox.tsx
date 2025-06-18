@@ -26,12 +26,6 @@ export const ChatBox = ({
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      // Only allow file drops if the selected model is from OpenAI
-      if (model[0] !== "OpenAI") {
-        alert("File upload is only available for OpenAI models");
-        return;
-      }
-
       if (currImageArray.length >= 1 || acceptedFiles.length > 1) {
         alert("Max one file at a time. File size limit: 4MB");
         return;
@@ -62,14 +56,13 @@ export const ChatBox = ({
         reader.readAsArrayBuffer(file);
       });
     },
-    [currImageArray, model]
+    [currImageArray]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     noClick: true,
     noKeyboard: true,
-    disabled: model[0] !== "OpenAI", // Disable dropzone if not OpenAI
   });
 
   return (
@@ -104,7 +97,7 @@ export const ChatBox = ({
               ? "Please provide a valid Anthropic API key in settings to begin chatting"
               : model[0] === "Google"
               ? "Please provide a valid Gemini API key in settings to begin chatting"
-              : "File upload is only available for OpenAI models"
+              : "Type your message here..."
           }
         />
         <div className="absolute bottom-0 left-10 bottom-1 flex flex-wrap mb-2 ml-2">

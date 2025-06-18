@@ -64,7 +64,7 @@ def stream():
     context = request.json['context']
 
     file_data = request.json['files']
-    print("file_data:", file_data)
+    
    
     model = request.json['model']
     company = request.json['company']
@@ -90,7 +90,8 @@ def stream():
         return Response("Please provide a valid Gemini API key in settings to begin chatting", mimetype='text/plain')
 
     if file_data:
-        file_data = handle_file_load(file_data, message, context, settings)
+    
+        file_data = handle_file_load(file_data, message, model, company, context, settings)
         type_file = file_data['all_paths'][0].split('.')[-1]
         print("type_file:", type_file)
         context.append({"files": file_data['all_text']})
@@ -245,7 +246,7 @@ class FileProcessor:
             raise Exception(f"Error processing file: {str(e)}")
 
 
-def handle_file_load(raw_file_data, prompt, context, settings):
+def handle_file_load(raw_file_data, prompt, model, company, context, settings):
     allowed_file_data = raw_file_data
    
     
@@ -266,7 +267,7 @@ def handle_file_load(raw_file_data, prompt, context, settings):
                 print("text:", text)
                 all_text.append(text['text'])
             else:
-                text = handle_image(raw_file_data, prompt, context, settings)
+                text = handle_image(raw_file_data, model, company, prompt, context, settings)
                 all_text.append(text)
             all_paths.append(file_specs['file_path'])
             print("file_specs['file_path']:", file_specs['file_path'])
@@ -275,13 +276,23 @@ def handle_file_load(raw_file_data, prompt, context, settings):
     print("all_paths:", all_paths)
     return {"message": "Files uploaded successfully", "all_text": all_text, "all_paths": all_paths}
 
-def handle_image(img, prompt, context, settings):
+def handle_image(img, model, company, prompt, context, settings):
     print("entered handle_image")
     
+
+    if company == 'OpenAI':
+        return handle_image_openai(img, model, prompt, context, settings)
+    elif company == 'Anthropic':
+        return handle_image_anthropic(img, model, prompt, context, settings)
+    elif company == 'Google':
+        return handle_image_gemini(img, model, prompt, context, settings)
+
+
+def handle_image_openai(img, model, prompt, context, settings):
     client = OpenAI(api_key=settings['OpenAI'])
     print("img[0]:", img[0])
     completion = client.chat.completions.create(
-    model="gpt-4o",
+    model=model,
   
     messages=[
         {
@@ -303,7 +314,73 @@ def handle_image(img, prompt, context, settings):
     print(completion.choices[0].message.content)
     return completion.choices[0].message.content
 
+def handle_image_anthropic(img, model, prompt, context, settings):
+    client = anthropic.Anthropic(api_key=settings['Anthropic'])
     
+    # Extract base64 data from the data URI
+    image_data = img[0]['imageData']
+    if image_data.startswith('data:'):
+        # Extract media type from data URI
+        media_type = image_data.split(';')[0].split(':')[1]
+        # Remove the data URI prefix (e.g., "data:image/jpeg;base64,")
+        base64_data = image_data.split(',')[1]
+    else:
+        base64_data = image_data
+        media_type = "image/jpeg"  # Default fallback
+    
+    message = client.messages.create(
+        model=model,
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": base64_data,
+                        },
+                    },
+                    {
+                        "type": "text",
+                        "text": prompt + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)
+                    }
+                ],
+            }
+        ],
+    )
+    print("message:", message)
+    return message.content[0].text
+
+
+def handle_image_gemini(img, model, prompt, context, settings):
+    image_data = img[0]['imageData']
+    if image_data.startswith('data:'):
+        # Extract media type from data URI
+        media_type = image_data.split(';')[0].split(':')[1]
+        # Remove the data URI prefix (e.g., "data:image/jpeg;base64,")
+        base64_data = image_data.split(',')[1]
+    else:
+        base64_data = image_data
+        media_type = "image/jpeg"  # Default fallback
+
+
+    client = genai.Client(api_key=settings['Gemini'])
+    response = client.models.generate_content(
+    model=model,
+    contents=[
+      types.Part.from_bytes(
+        data=base64_data,
+        mime_type=media_type,
+      ),
+      prompt + ". Context (only use the context for this chat history and do not say anything like based on the context):" + str(context)
+    ]
+  )
+
+    print("response.text:", response.text)
+    return response.text
 
 def upload_file(file):
     try:
